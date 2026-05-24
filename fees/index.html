@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FEES Evaluation — Fiberoptic Endoscopic Evaluation of Swallowing</title>
+  <meta name="description" content="Clinical tool for recording FEES evaluations, step-wise swallowing assessment, and generating therapy recommendation reports." />
+  <link rel="stylesheet" href="css/styles.css" />
+  <!-- jsPDF CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ───── HEADER ───── -->
+  <header class="header">
+    <div class="header-logo"><img src="media/logo.png" alt="FEES Logo"></div>
+    <div class="header-text">
+      <h1>FEES Evaluator</h1>
+      <p>Fiberoptic Endoscopic Evaluation of Swallowing</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-outline btn-sm" id="btn-clear">🗑 New Evaluation</button>
+    </div>
+  </header>
+
+  <!-- ───── MAIN CONTENT ───── -->
+  <main class="main-content">
+
+    <!-- ── STEPPER ── -->
+    <div class="stepper">
+      <div class="stepper-track">
+        <div class="stepper-fill" style="width:0%"></div>
+      </div>
+      <div class="stepper-items">
+        <div class="step-item active" data-step="1">
+          <div class="step-dot"><span class="step-number">1</span></div>
+          <div class="step-label">Patient Info</div>
+        </div>
+        <div class="step-item" data-step="2">
+          <div class="step-dot"><span class="step-number">2</span></div>
+          <div class="step-label">Pre-Swallow</div>
+        </div>
+        <div class="step-item" data-step="3">
+          <div class="step-dot"><span class="step-number">3</span></div>
+          <div class="step-label">Swallow Trials</div>
+        </div>
+        <div class="step-item" data-step="4">
+          <div class="step-dot"><span class="step-number">4</span></div>
+          <div class="step-label">Therapeutic</div>
+        </div>
+        <div class="step-item" data-step="5">
+          <div class="step-dot"><span class="step-number">5</span></div>
+          <div class="step-label">Summary & PDF</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════
+         STEP 1 — PATIENT INFORMATION
+    ═════════════════════════════════════ -->
+    <div class="step-panel active" id="step-1">
+      <div class="card">
+        <div class="card-header">
+          <div class="step-badge">👤 Step 1 of 5</div>
+          <h2>Patient Information</h2>
+          <p>Enter the patient's demographic and referral details.</p>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="pat-name">Patient Name <span class="required">*</span></label>
+            <input type="text" id="pat-name" placeholder="Full name" />
+          </div>
+          <div class="form-group">
+            <label for="pat-dob">Date of Birth</label>
+            <input type="date" id="pat-dob" />
+          </div>
+          <div class="form-group">
+            <label for="pat-age">Age (years)</label>
+            <input type="number" id="pat-age" placeholder="e.g. 68" min="0" max="130" />
+          </div>
+          <div class="form-group">
+            <label for="pat-gender">Gender</label>
+            <select id="pat-gender">
+              <option value="">— Select —</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Non-binary">Non-binary / Other</option>
+              <option value="Prefer not to say">Prefer not to say</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="pat-mrn">Medical Record Number (MRN)</label>
+            <input type="text" id="pat-mrn" placeholder="e.g. MRN-00123" />
+          </div>
+          <div class="form-group">
+            <label for="pat-physician">Referring Physician</label>
+            <input type="text" id="pat-physician" placeholder="Dr. Name" />
+          </div>
+        </div>
+
+        <div class="section-divider">
+          <div class="section-divider-line"></div>
+          <div class="section-divider-label">Clinical Details</div>
+          <div class="section-divider-line"></div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <label for="pat-diagnosis">Primary Diagnosis</label>
+            <input type="text" id="pat-diagnosis" placeholder="e.g. CVA with left hemiplegia, Head & Neck Cancer, Parkinson's disease..." />
+          </div>
+          <div class="form-group full-width">
+            <label for="pat-referral">Reason for Referral / Chief Complaint</label>
+            <input type="text" id="pat-referral" placeholder="e.g. Suspected aspiration, coughing with meals, weight loss..." />
+          </div>
+        </div>
+
+        <div class="section-divider">
+          <div class="section-divider-line"></div>
+          <div class="section-divider-label">Evaluation Details</div>
+          <div class="section-divider-line"></div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="pat-eval-date">Date of Evaluation</label>
+            <input type="date" id="pat-eval-date" />
+          </div>
+          <div class="form-group">
+            <label for="pat-evaluator">Evaluator Name / Credentials</label>
+            <input type="text" id="pat-evaluator" placeholder="e.g. Jane Smith, M.S., CCC-SLP" />
+          </div>
+          <div class="form-group full-width">
+            <label for="pat-facility">Facility / Setting</label>
+            <input type="text" id="pat-facility" placeholder="e.g. General Hospital, Otolaryngology Clinic, Inpatient Rehab" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════
+         STEP 2 — PRE-SWALLOW ASSESSMENT
+    ═════════════════════════════════════ -->
+    <div class="step-panel" id="step-2">
+      <div class="card">
+        <div class="card-header">
+          <div class="step-badge">🔬 Step 2 of 5</div>
+          <h2>Pre-Swallow Assessment</h2>
+          <p>Structural and functional assessment before swallow trials begin.</p>
+        </div>
+
+        <div class="info-box" style="margin-bottom:24px">
+          <span class="icon">ℹ</span>
+          <span>Assess anatomical integrity and resting function of structures involved in swallowing with the endoscope positioned in the pharynx above the epiglottis.</span>
+        </div>
+
+        <div class="section-divider">
+          <div class="section-divider-line"></div>
+          <div class="section-divider-label">Structural Observations</div>
+          <div class="section-divider-line"></div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="ps-pharyngeal-symmetry">Pharyngeal Symmetry</label>
+            <select id="ps-pharyngeal-symmetry">
+              <option value="">— Select —</option>
+              <option value="Symmetric">Symmetric</option>
+              <option value="Asymmetric (L)">Asymmetric — Left reduced</option>
+              <option value="Asymmetric (R)">Asymmetric — Right reduced</option>
+              <option value="Diffusely reduced">Diffusely reduced</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="ps-vf-appearance">Vocal Fold Appearance</label>
+            <select id="ps-vf-appearance">
+              <option value="">— Select —</option>
+              <option value="Normal">Normal</option>
+              <option value="Edema">Edematous</option>
+              <option value="Erythematous">Erythematous</option>
+              <option value="Lesion present">Lesion present</option>
+              <option value="Post-surgical changes">Post-surgical changes</option>
+              <option value="Atrophic">Atrophic</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="ps-vf-left">VF Mobility — Left</label>
+            <select id="ps-vf-left">
+              <option value="">— Select —</option>
+              <option value="Normal">Normal (full excursion)</option>
+              <option value="Reduced">Reduced mobility</option>
+              <option value="Absent">Absent / Fixed</option>
+              <option value="Paradoxical">Paradoxical movement</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="ps-vf-right">VF Mobility — Right</label>
+            <select id="ps-vf-right">
+              <option value="">— Select —</option>
+              <option value="Normal">Normal (full excursion)</option>
+              <option value="Reduced">Reduced mobility</option>
+              <option value="Absent">Absent / Fixed</option>
+              <option value="Paradoxical">Paradoxical movement</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="ps-veloph">Velopharyngeal Closure</label>
+            <select id="ps-veloph">
+              <option value="">— Select —</option>
+              <option value="Adequate">Adequate</option>
+              <option value="Mildly inadequate">Mildly inadequate</option>
+              <option value="Moderately inadequate">Moderately inadequate</option>
+              <option value="Severely inadequate">Severely inadequate</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="ps-laryngeal-elevation">Laryngeal Elevation (Non-swallow)</label>
+            <select id="ps-laryngeal-elevation">
+              <option value="">— Select —</option>
+              <option value="normal">Normal</option>
+              <option value="reduced">Reduced</option>
+              <option value="absent">Absent</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="ps-sensation">Laryngopharyngeal Sensation</label>
+            <select id="ps-sensation">
+              <option value="">— Select —</option>
+              <option value="normal">Normal</option>
+              <option value="reduced">Reduced</option>
+              <option value="absent">Absent</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="ps-tongue-base">Base of Tongue Retraction</label>
+            <select id="ps-tongue-base">
+              <option value="">— Select —</option>
+              <option value="normal">Normal</option>
+              <option value="reduced">Reduced</option>
+              <option value="absent">Absent</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="section-divider">
+          <div class="section-divider-line"></div>
+          <div class="section-divider-label">Secretion Management</div>
+          <div class="section-divider-line"></div>
+        </div>
+
+        <div class="form-group">
+          <label>Secretion Rating Scale (Murray, 1996)</label>
+          <div class="radio-group" style="flex-direction:column; gap:10px; margin-top:4px">
+            <button class="radio-btn" data-group="secretion-rating" data-value="1" style="text-align:left; border-radius:10px; width:100%; max-width:600px" onclick="selectRadioBtn(this)">
+              <strong>1 — Normal:</strong> No secretions, or trace on vocal folds only
+            </button>
+            <button class="radio-btn" data-group="secretion-rating" data-value="2" style="text-align:left; border-radius:10px; width:100%; max-width:600px" onclick="selectRadioBtn(this)">
+              <strong>2 — Mild:</strong> Secretions in pyriform sinuses / valleculae, cleared spontaneously
+            </button>
+            <button class="radio-btn" data-group="secretion-rating" data-value="3" style="text-align:left; border-radius:10px; width:100%; max-width:600px" onclick="selectRadioBtn(this)">
+              <strong>3 — Moderate:</strong> Pooling in pharynx, not spontaneously cleared
+            </button>
+            <button class="radio-btn" data-group="secretion-rating" data-value="4" style="text-align:left; border-radius:10px; width:100%; max-width:600px" onclick="selectRadioBtn(this)">
+              <strong>4 — Severe:</strong> Copious secretions with transglottic aspiration
+            </button>
+          </div>
+        </div>
+
+        <div class="form-group mt-20">
+          <label for="ps-notes">Clinical Notes / Additional Observations</label>
+          <textarea id="ps-notes" rows="3" placeholder="Describe any additional structural findings, lesions, asymmetry, or relevant observations..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════
+         STEP 3 — SWALLOW TRIALS
+    ═════════════════════════════════════ -->
+    <div class="step-panel" id="step-3">
+      <div class="card">
+        <div class="card-header">
+          <div class="step-badge">🥤 Step 3 of 5</div>
+          <h2>Swallow Trials</h2>
+          <p>Record observations for each food/liquid consistency trial. Add as many trials as needed.</p>
+        </div>
+
+        <div class="info-box" style="margin-bottom:20px">
+          <span class="icon">ℹ</span>
+          <span>Present colored boluses (typically green food dye) in standardized amounts. Rate penetration/aspiration using the Rosenbek Penetration-Aspiration Scale (PAS 1–8).</span>
+        </div>
+
+        <div class="trials-container" id="trials-container">
+          <!-- Dynamically added by app.js -->
+        </div>
+
+        <div style="margin-top:20px">
+          <button class="btn btn-secondary" id="add-trial-btn">
+            ＋ Add Another Trial
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════
+         STEP 4 — THERAPEUTIC ASSESSMENT
+    ═════════════════════════════════════ -->
+    <div class="step-panel" id="step-4">
+      <div class="card">
+        <div class="card-header">
+          <div class="step-badge">⚖️ Step 4 of 5</div>
+          <h2>Therapeutic Assessment</h2>
+          <p>Trial compensatory strategies and record their effectiveness. Set final dietary recommendations.</p>
+        </div>
+
+        <div class="info-box" style="margin-bottom:24px">
+          <span class="icon">ℹ</span>
+          <span>FEES biofeedback allows the patient to observe their own swallowing and the effect of each compensatory strategy in real time. Only rate strategies that were formally trialed.</span>
+        </div>
+
+        <div class="section-divider">
+          <div class="section-divider-line"></div>
+          <div class="section-divider-label">Compensatory Strategies Trialed</div>
+          <div class="section-divider-line"></div>
+        </div>
+
+        <div class="strategy-grid" id="strategy-grid">
+          <!-- Dynamically added by app.js -->
+        </div>
+
+        <div class="section-divider">
+          <div class="section-divider-line"></div>
+          <div class="section-divider-label">Dietary Recommendations</div>
+          <div class="section-divider-line"></div>
+        </div>
+
+        <div class="info-box" style="margin-bottom:16px">
+          <span class="icon">💡</span>
+          <span>Leave blank to let the system auto-determine IDDSI levels based on your swallow trial findings, or override below.</span>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="rec-liquid-iddsi">Liquid IDDSI Level (Override)</label>
+            <select id="rec-liquid-iddsi">
+              <option value="">Auto-determine from findings</option>
+              <option value="0">0 — Thin (Water)</option>
+              <option value="1">1 — Slightly Thick</option>
+              <option value="2">2 — Mildly Thick (Nectar)</option>
+              <option value="3">3 — Moderately Thick (Honey)</option>
+              <option value="4">4 — Extremely Thick (Pudding)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="rec-food-iddsi">Food IDDSI Level (Override)</label>
+            <select id="rec-food-iddsi">
+              <option value="">Auto-determine from findings</option>
+              <option value="3">3 — Liquidised</option>
+              <option value="4">4 — Pureed</option>
+              <option value="5">5 — Minced & Moist</option>
+              <option value="6">6 — Soft & Bite-Sized</option>
+              <option value="7">7 — Regular Diet</option>
+            </select>
+          </div>
+          <div class="form-group full-width">
+            <label for="therapeutic-notes">Therapeutic Notes</label>
+            <textarea id="therapeutic-notes" rows="3" placeholder="Additional notes on strategies, patient compliance, caregiver education..."></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════
+         STEP 5 — SUMMARY & PDF
+    ═════════════════════════════════════ -->
+    <div class="step-panel" id="step-5">
+      <div class="card">
+        <div class="card-header">
+          <div class="step-badge">📄 Step 5 of 5</div>
+          <h2>Summary & Report Generation</h2>
+          <p>Review auto-generated therapy recommendations and download your clinical PDF report.</p>
+        </div>
+
+        <!-- Dynamic summary rendered by app.js -->
+        <div id="summary-content">
+          <div style="text-align:center; padding:40px; color:var(--text-muted)">
+            <div style="font-size:48px; margin-bottom:16px">⏳</div>
+            <div>Loading summary...</div>
+          </div>
+        </div>
+
+        <div class="section-divider">
+          <div class="section-divider-line"></div>
+          <div class="section-divider-label">Clinical Impressions</div>
+          <div class="section-divider-line"></div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <label for="clinical-impression">Clinical Impressions & Discussion</label>
+            <textarea id="clinical-impression" rows="4" placeholder="Overall clinical impression, patient's functional reserve, prognosis for therapy, patient/family education provided..."></textarea>
+          </div>
+          <div class="form-group full-width">
+            <label for="follow-up-plan">Follow-Up Plan</label>
+            <textarea id="follow-up-plan" rows="3" placeholder="e.g. Initiate dysphagia therapy 3x/week, repeat FEES in 4 weeks, refer to gastroenterology for PEG consideration..."></textarea>
+          </div>
+        </div>
+
+        <div style="margin-top:28px; text-align:center">
+          <div style="font-size:13px; color:var(--text-muted); margin-bottom:16px; display:flex; align-items:center; justify-content:center; gap:8px">
+            <input type="checkbox" id="pdf-monochrome" style="width:16px; height:16px; cursor:pointer" />
+            <label for="pdf-monochrome" style="cursor:pointer; margin:0">Monochrome PDF Report (Grayscale)</label>
+          </div>
+          <div style="font-size:13px; color:var(--text-muted); margin-bottom:16px">
+            All entered data will be compiled into a professional PDF report
+          </div>
+          <button class="btn btn-success btn-lg" id="btn-generate-2" onclick="
+            document.getElementById('btn-generate').click()
+          ">
+            📄 Generate &amp; Download PDF Report
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </main><!-- end .main-content -->
+
+  <!-- ───── BOTTOM NAV BAR ───── -->
+  <nav class="nav-bar">
+    <button class="btn btn-outline" id="btn-prev" style="display:none">← Previous</button>
+    <span class="nav-info" id="nav-info">Step 1 of 5</span>
+    <div style="display:flex; gap:10px; align-items:center">
+      <button class="btn btn-primary" id="btn-next">Next Step →</button>
+      <button class="btn btn-success" id="btn-generate" style="display:none">📄 Generate PDF</button>
+    </div>
+  </nav>
+
+</div><!-- end #app -->
+
+<!-- Scripts -->
+<script src="js/fees-data.js?v=1.0.1"></script>
+<script src="js/pdf-generator.js?v=1.1.0"></script>
+<script src="js/app.js?v=1.0.2"></script>
+
+</body>
+</html>

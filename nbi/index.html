@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NBI EndoReport — Oral Cavity, Oropharynx & Larynx</title>
+  <meta name="description" content="Comprehensive Narrow Band Imaging (NBI) endoscopic reporting tool for oral cavity, oropharynx, and laryngeal lesions. Automated severity assessment, risk stratification, and PDF report generation." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <!-- jsPDF for PDF generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.7.1/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="app-header">
+  <div class="header-inner">
+    <div class="header-brand">
+      <div class="brand-icon">
+        <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="20" cy="20" r="18" stroke="url(#g1)" stroke-width="2"/>
+          <circle cx="20" cy="20" r="8" fill="url(#g2)" opacity="0.8"/>
+          <path d="M20 6 C26 10 30 16 28 22" stroke="#7dd3fc" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M14 8 C8 14 8 22 12 28" stroke="#a78bfa" stroke-width="1.5" stroke-linecap="round"/>
+          <defs>
+            <linearGradient id="g1" x1="0" y1="0" x2="40" y2="40">
+              <stop offset="0%" stop-color="#7dd3fc"/>
+              <stop offset="100%" stop-color="#a78bfa"/>
+            </linearGradient>
+            <linearGradient id="g2" x1="0" y1="0" x2="40" y2="40">
+              <stop offset="0%" stop-color="#0ea5e9" stop-opacity="0.6"/>
+              <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0.6"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <div>
+        <h1 class="brand-title">NBI EndoReport</h1>
+        <p class="brand-subtitle">Narrow Band Imaging · Oral Cavity · Oropharynx · Larynx</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-ghost" id="btnNewReport" onclick="newReport()">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"/></svg>
+        New Report
+      </button>
+      <button class="btn btn-primary" id="btnDownloadPDF" onclick="generatePDF()">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+        Download PDF
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- PROGRESS BAR -->
+<div class="progress-bar-container">
+  <div class="progress-steps">
+    <div class="step active" id="step-indicator-1" onclick="goToSection(1)">
+      <span class="step-num">1</span><span class="step-label">Patient Info</span>
+    </div>
+    <div class="step-line"></div>
+    <div class="step" id="step-indicator-2" onclick="goToSection(2)">
+      <span class="step-num">2</span><span class="step-label">Procedure</span>
+    </div>
+    <div class="step-line"></div>
+    <div class="step" id="step-indicator-3" onclick="goToSection(3)">
+      <span class="step-num">3</span><span class="step-label">WL Findings</span>
+    </div>
+    <div class="step-line"></div>
+    <div class="step" id="step-indicator-4" onclick="goToSection(4)">
+      <span class="step-num">4</span><span class="step-label">NBI Analysis</span>
+    </div>
+    <div class="step-line"></div>
+    <div class="step" id="step-indicator-5" onclick="goToSection(5)">
+      <span class="step-num">5</span><span class="step-label">Assessment</span>
+    </div>
+    <div class="step-line"></div>
+    <div class="step" id="step-indicator-6" onclick="goToSection(6)">
+      <span class="step-num">6</span><span class="step-label">Report</span>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<main class="app-main">
+  <!-- LEFT: FORM -->
+  <div class="form-panel" id="formPanel">
+
+    <!-- SECTION 1: PATIENT INFO -->
+    <section class="form-section active" id="section1" data-section="1">
+      <div class="section-header">
+        <div class="section-icon" style="background:linear-gradient(135deg,#0ea5e9,#6366f1)">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/></svg>
+        </div>
+        <div>
+          <h2 class="section-title">Patient Information</h2>
+          <p class="section-desc">Demographic and clinical background</p>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="patientName">Patient Name <span class="req">*</span></label>
+          <input type="text" id="patientName" placeholder="Full name" oninput="updatePreview()" />
+        </div>
+        <div class="form-group">
+          <label for="patientId">Patient ID / MRN</label>
+          <input type="text" id="patientId" placeholder="Hospital ID" oninput="updatePreview()" />
+        </div>
+        <div class="form-group">
+          <label for="patientDob">Date of Birth <span class="req">*</span></label>
+          <input type="date" id="patientDob" oninput="calcAge(); updatePreview()" max="" />
+        </div>
+        <div class="form-group">
+          <label for="patientAge">Age <span class="age-auto-badge">Auto</span></label>
+          <div class="age-input-wrap">
+            <input type="number" id="patientAge" placeholder="Calculated from DOB" min="0" max="120" oninput="updatePreview()" class="age-auto" />
+            <span class="age-unit">yrs</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="patientGender">Gender <span class="req">*</span></label>
+          <select id="patientGender" onchange="updatePreview()">
+            <option value="">Select gender</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="examDate">Examination Date <span class="req">*</span></label>
+          <input type="date" id="examDate" oninput="updatePreview()" />
+        </div>
+        <div class="form-group">
+          <label for="referringDoctor">Referring Clinician</label>
+          <input type="text" id="referringDoctor" placeholder="Dr. Name / Department" oninput="updatePreview()" />
+        </div>
+        <div class="form-group">
+          <label for="reportingDoctor">Reporting Endoscopist <span class="req">*</span></label>
+          <input type="text" id="reportingDoctor" placeholder="Dr. Name" oninput="updatePreview()" />
+        </div>
+        <div class="form-group">
+          <label for="institution">Institution / Hospital</label>
+          <input type="text" id="institution" placeholder="Hospital / Clinic name" oninput="updatePreview()" />
+        </div>
+      </div>
+
+      <!-- Risk Factors -->
+      <div class="subsection">
+        <h3 class="subsection-title">Risk Factor Profile</h3>
+        <div class="checkbox-grid">
+          <label class="checkbox-card" id="rf-tobacco">
+            <input type="checkbox" id="rfTobacco" onchange="updateRiskProfile()" />
+            <div class="checkbox-icon">🚬</div>
+            <span>Tobacco Use</span>
+          </label>
+          <label class="checkbox-card" id="rf-alcohol">
+            <input type="checkbox" id="rfAlcohol" onchange="updateRiskProfile()" />
+            <div class="checkbox-icon">🍷</div>
+            <span>Alcohol Use</span>
+          </label>
+          <label class="checkbox-card" id="rf-betel">
+            <input type="checkbox" id="rfBetel" onchange="updateRiskProfile()" />
+            <div class="checkbox-icon">🌿</div>
+            <span>Betel Nut / Pan</span>
+          </label>
+          <label class="checkbox-card" id="rf-hpv">
+            <input type="checkbox" id="rfHpv" onchange="updateRiskProfile()" />
+            <div class="checkbox-icon">🦠</div>
+            <span>HPV Positive</span>
+          </label>
+          <label class="checkbox-card" id="rf-gerd">
+            <input type="checkbox" id="rfGerd" onchange="updateRiskProfile()" />
+            <div class="checkbox-icon">🔥</div>
+            <span>GERD / LPR</span>
+          </label>
+          <label class="checkbox-card" id="rf-immunocompromised">
+            <input type="checkbox" id="rfImmunocomp" onchange="updateRiskProfile()" />
+            <div class="checkbox-icon">🛡️</div>
+            <span>Immunocompromised</span>
+          </label>
+          <label class="checkbox-card" id="rf-prev-cancer">
+            <input type="checkbox" id="rfPrevCancer" onchange="updateRiskProfile()" />
+            <div class="checkbox-icon">⚕️</div>
+            <span>Prior H&amp;N Cancer</span>
+          </label>
+          <label class="checkbox-card" id="rf-osmf">
+            <input type="checkbox" id="rfOsmf" onchange="updateRiskProfile()" />
+            <div class="checkbox-icon">🔗</div>
+            <span>Oral Submucous Fibrosis</span>
+          </label>
+        </div>
+        <div class="form-group mt-sm">
+          <label for="clinicalIndication">Clinical Indication / Presenting Complaint</label>
+          <textarea id="clinicalIndication" rows="2" placeholder="e.g., persistent white patch on buccal mucosa × 3 months, hoarseness, dysphagia..." oninput="updatePreview()"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="previousHistory">Previous Biopsy / Treatment History</label>
+          <textarea id="previousHistory" rows="2" placeholder="e.g., Biopsy 2023 – mild dysplasia right lateral tongue. Surveillance NBI." oninput="updatePreview()"></textarea>
+        </div>
+      </div>
+
+      <div class="nav-buttons">
+        <button class="btn btn-primary" onclick="nextSection(1)">Next: Procedure Details →</button>
+      </div>
+    </section>
+
+    <!-- SECTION 2: PROCEDURE -->
+    <section class="form-section" id="section2" data-section="2">
+      <div class="section-header">
+        <div class="section-icon" style="background:linear-gradient(135deg,#06b6d4,#0ea5e9)">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+        <div>
+          <h2 class="section-title">Procedure Details</h2>
+          <p class="section-desc">Equipment, technique, and anatomical coverage</p>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="endoscopeType">Endoscope Type <span class="req">*</span></label>
+          <select id="endoscopeType" onchange="updatePreview()">
+            <option value="">Select type</option>
+            <option value="Flexible fiberoptic laryngoscope">Flexible fiberoptic laryngoscope</option>
+            <option value="Rigid 0° Hopkins rod laryngoscope">Rigid 0° Hopkins rod laryngoscope</option>
+            <option value="Rigid 30° Hopkins rod laryngoscope">Rigid 30° Hopkins rod laryngoscope</option>
+            <option value="Flexible videoendoscope (transnasal)">Flexible videoendoscope (transnasal)</option>
+            <option value="Operative microlaryngoscope">Operative microlaryngoscope</option>
+            <option value="Flexible oral endoscope">Flexible oral endoscope</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="nbiSystem">NBI System / Platform</label>
+          <select id="nbiSystem" onchange="updatePreview()">
+            <option value="">Select system</option>
+            <option value="Olympus EVIS EXERA III (190 series)">Olympus EVIS EXERA III (190 series)</option>
+            <option value="Olympus EVIS LUCERA ELITE (260 series)">Olympus EVIS LUCERA ELITE (260 series)</option>
+            <option value="Olympus VISERA ELITE II">Olympus VISERA ELITE II</option>
+            <option value="Karl Storz IMAGE1 S">Karl Storz IMAGE1 S</option>
+            <option value="Fujifilm LASEREO / BLI">Fujifilm LASEREO / BLI</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="magnification">Magnification</label>
+          <select id="magnification" onchange="updatePreview()">
+            <option value="Standard (non-magnification)">Standard (non-magnification)</option>
+            <option value="High-magnification NBI">High-magnification NBI</option>
+            <option value="Contact endoscopy">Contact endoscopy</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="anesthesia">Anesthesia / Patient Setting</label>
+          <select id="anesthesia" onchange="updatePreview()">
+            <option value="Outpatient – topical anaesthesia">Outpatient – topical anaesthesia</option>
+            <option value="Outpatient – no anaesthesia">Outpatient – no anaesthesia</option>
+            <option value="GA – microlaryngoscopy (MLB)">GA – microlaryngoscopy (MLB)</option>
+            <option value="GA – panendoscopy">GA – panendoscopy</option>
+            <option value="Sedation (conscious)">Sedation (conscious)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="imageQuality">Image Quality</label>
+          <select id="imageQuality" onchange="updatePreview()">
+            <option value="Excellent">Excellent</option>
+            <option value="Good">Good</option>
+            <option value="Adequate">Adequate</option>
+            <option value="Limited">Limited</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="limitingFactors">Limiting Factors (if any)</label>
+          <input type="text" id="limitingFactors" placeholder="e.g., gag reflex, thick keratosis obscuring vessels" oninput="updatePreview()" />
+        </div>
+      </div>
+
+      <!-- Anatomical Areas Examined -->
+      <div class="subsection">
+        <h3 class="subsection-title">Anatomical Areas Examined</h3>
+        <div class="anatomy-grid">
+          <div class="anatomy-column">
+            <h4 class="anatomy-col-title">Oral Cavity</h4>
+            <div class="toggle-list">
+              <label class="toggle-item"><input type="checkbox" id="anat-buccal" onchange="updatePreview()" /><span>Buccal mucosa (R/L)</span></label>
+              <label class="toggle-item"><input type="checkbox" id="anat-tongue-dorsum" onchange="updatePreview()" /><span>Tongue – dorsum</span></label>
+              <label class="toggle-item"><input type="checkbox" id="anat-tongue-ventral" onchange="updatePreview()" /><span>Tongue – ventral/lateral</span></label>
+              <label class="toggle-item"><input type="checkbox" id="anat-floor" onchange="updatePreview()" /><span>Floor of mouth</span></label>
+              <label class="toggle-item"><input type="checkbox" id="anat-gingiva" onchange="updatePreview()" /><span>Gingiva / alveolar ridge</span></label>
+              <label class="toggle-item"><input type="checkbox" id="anat-hard-palate" onchange="updatePreview()" /><span>Hard palate</span></label>
+              <label class="toggle-item"><input type="checkbox" id="anat-lips" onchange="updatePreview()" /><span>Lips / commissure</span></label>
+              <label class="toggle-item"><input type="checkbox" id="anat-retromolar" onchange="updatePreview()" /><span>Retromolar trigone</span></label>
+            </div>
+          </div>
+          <div class="anatomy-column">
+            <h4 class="anatomy-col-title">Oropharynx</h4>
+            <div class="toggle-list">
+              <label class="toggle-item"><input type="checkbox" id="anat-soft-palate" onchange="updatePreview()" /><span>Soft palate / uvula</span></label>
+              <label class="toggle-item"><input type="checkbox" id="anat-tonsil" onchange="updatePreview()" /><span>Palatine tonsils</span></label>
+              <label class="toggle-item"><input type="checkbox" id="anat-tonsillar-pillars" onchange="updatePreview()" /><span>Tonsillar pillars</span></label>
+              <label class="toggle-item"><input type="checkbox" id="anat-post-pharynx" onchange="updatePreview()" /><span>Posterior pharyngeal wall</span></label>
+              <label class="toggle-item"><input type="checkbox" id="anat-base-tongue" onchange="updatePreview()" /><span>Base of tongue</span></label>
+              <label class="toggle-item"><input type="checkbox" id="anat-vallecula" onchange="updatePreview()" /><span>Vallecula</span></label>
+            </div>
+          </div>
+          <div class="anatomy-column">
+            <h4 class="anatomy-col-title">Larynx / Hypopharynx</h4>
+            <div class="toggle-list">
+              <label class="toggle-item"><input type="checkbox" id="anat-epiglottis" onchange="updatePreview()" /><span>Epiglottis</span></label>
+              <label class="toggle-item"><input type="checkbox" id="anat-aryepiglottic" onchange="updatePreview()" /><span>Aryepiglottic folds</span></label>
+              <label class="toggle-item"><input type="checkbox" id="anat-false-cords" onchange="updatePreview()" /><span>False vocal cords</span></label>
+              <label class="toggle-item"><input type="checkbox" id="anat-true-cords" onchange="updatePreview()" /><span>True vocal cords</span></label>
+              <label class="toggle-item"><input type="checkbox" id="anat-subglottis" onchange="updatePreview()" /><span>Subglottis</span></label>
+              <label class="toggle-item"><input type="checkbox" id="anat-piriform" onchange="updatePreview()" /><span>Pyriform sinuses</span></label>
+              <label class="toggle-item"><input type="checkbox" id="anat-post-cricoid" onchange="updatePreview()" /><span>Post-cricoid region</span></label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-buttons">
+        <button class="btn btn-ghost" onclick="prevSection(2)">← Back</button>
+        <button class="btn btn-primary" onclick="nextSection(2)">Next: White Light Findings →</button>
+      </div>
+    </section>
+
+    <!-- SECTION 3: WHITE LIGHT FINDINGS -->
+    <section class="form-section" id="section3" data-section="3">
+      <div class="section-header">
+        <div class="section-icon" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 2a2 2 0 00-2 2v11a3 3 0 106 0V4a2 2 0 00-2-2H4zm1 14a1 1 0 100-2 1 1 0 000 2zm5-1.757l4.9-4.9a2 2 0 000-2.828L13.485 5.1a2 2 0 00-2.828 0L10 5.757v8.486zM16 18H9.071l6-6H16a2 2 0 012 2v2a2 2 0 01-2 2z" clip-rule="evenodd"/></svg>
+        </div>
+        <div>
+          <h2 class="section-title">White Light Endoscopy Findings</h2>
+          <p class="section-desc">Conventional WLE assessment before NBI</p>
+        </div>
+      </div>
+
+      <!-- Lesion Builder -->
+      <div class="subsection">
+        <div class="subsection-header-row">
+          <h3 class="subsection-title">Lesion Documentation</h3>
+          <button class="btn btn-sm btn-accent" onclick="addLesion()">+ Add Lesion</button>
+        </div>
+        <div id="lesionsContainer">
+          <!-- Lesions added dynamically -->
+        </div>
+        <div class="empty-state" id="noLesionsMsg">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <p>No lesions added yet. Click "+ Add Lesion" to document findings.</p>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <h3 class="subsection-title">General Mucosal Assessment</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="normalMucosa">Normal Mucosa Appearance</label>
+            <select id="normalMucosa" onchange="updatePreview()">
+              <option value="Normal pink, smooth, glistening">Normal pink, smooth, glistening</option>
+              <option value="Mildly erythematous background">Mildly erythematous background</option>
+              <option value="Dry, atrophic mucosa">Dry, atrophic mucosa</option>
+              <option value="Cobblestoning / irregular surface">Cobblestoning / irregular surface</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="fieldCancerization">Field Cancerization Evidence</label>
+            <select id="fieldCancerization" onchange="updatePreview()">
+              <option value="None apparent">None apparent</option>
+              <option value="Possible – widespread mucosal changes">Possible – widespread mucosal changes</option>
+              <option value="Suspected – multifocal lesions">Suspected – multifocal lesions</option>
+              <option value="Confirmed – synchronous lesions">Confirmed – synchronous lesions</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="wlComments">Additional WL Observations</label>
+          <textarea id="wlComments" rows="2" placeholder="Describe any additional findings, symmetry, mobility assessment..." oninput="updatePreview()"></textarea>
+        </div>
+      </div>
+
+      <div class="nav-buttons">
+        <button class="btn btn-ghost" onclick="prevSection(3)">← Back</button>
+        <button class="btn btn-primary" onclick="nextSection(3)">Next: NBI Analysis →</button>
+      </div>
+    </section>
+
+    <!-- SECTION 4: NBI ANALYSIS -->
+    <section class="form-section" id="section4" data-section="4">
+      <div class="section-header">
+        <div class="section-icon" style="background:linear-gradient(135deg,#8b5cf6,#06b6d4)">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"/></svg>
+        </div>
+        <div>
+          <h2 class="section-title">NBI Vascular Pattern Analysis</h2>
+          <p class="section-desc">IPCL classification per lesion using validated international systems</p>
+        </div>
+      </div>
+
+      <!-- Classification Reference Card -->
+      <div class="reference-card">
+        <div class="reference-tabs">
+          <button class="ref-tab active" onclick="showRefTab('ipcl')" id="tab-ipcl">IPCL / Ni Classification</button>
+          <button class="ref-tab" onclick="showRefTab('els')" id="tab-els">ELS (Larynx)</button>
+          <button class="ref-tab" onclick="showRefTab('who')" id="tab-who">WHO OPMD Grades</button>
+        </div>
+        <div class="ref-content" id="ref-ipcl">
+          <table class="ref-table">
+            <thead><tr><th>Type</th><th>Vascular Pattern</th><th>Typical Pathology</th><th>Risk</th></tr></thead>
+            <tbody>
+              <tr class="risk-0"><td><span class="badge badge-grey">Type 0</span></td><td>No vessels visible (keratosis obscures)</td><td>Thick keratinization – evaluate surrounding mucosa</td><td>Indeterminate</td></tr>
+              <tr class="risk-low"><td><span class="badge badge-green">Type I</span></td><td>Normal – wavy/arborescent, fine calibre</td><td>Normal mucosa / benign</td><td>Very Low</td></tr>
+              <tr class="risk-low"><td><span class="badge badge-blue">Type II</span></td><td>Dilated, increased calibre – oblique vessels</td><td>Inflammation, hyperplasia</td><td>Low</td></tr>
+              <tr class="risk-mod"><td><span class="badge badge-yellow">Type III</span></td><td>Elongated, tortuous, dilated IPCLs</td><td>Mild–moderate dysplasia</td><td>Moderate</td></tr>
+              <tr class="risk-high"><td><span class="badge badge-orange">Type IV</span></td><td>Irregular brown dots; IPCLs – loop morphology visible</td><td>Severe dysplasia / CIS</td><td>High</td></tr>
+              <tr class="risk-veryhigh"><td><span class="badge badge-red">Type V</span></td><td>Destruction of IPCLs; Va: scattered dots; Vb: irregular loops; Vc: avascular</td><td>Invasive SCC</td><td>Very High</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="ref-content hidden" id="ref-els">
+          <table class="ref-table">
+            <thead><tr><th>Pattern</th><th>Description</th><th>Interpretation</th><th>Action</th></tr></thead>
+            <tbody>
+              <tr class="risk-low"><td><span class="badge badge-green">LVC</span></td><td>Longitudinal Vascular Changes – vessels parallel to vocal fold length</td><td>Benign (inflammation, polyp)</td><td>Observe / treat conservatively</td></tr>
+              <tr class="risk-high"><td><span class="badge badge-red">PVC-NA</span></td><td>Perpendicular Vascular Changes – narrow angle; papilloma pattern</td><td>HPV papilloma / low-grade SIN</td><td>Biopsy / excision</td></tr>
+              <tr class="risk-veryhigh"><td><span class="badge badge-red">PVC-WA</span></td><td>Perpendicular Vascular Changes – wide angle; irregular loop destruction</td><td>High-grade SIN / SCC</td><td>Urgent biopsy</td></tr>
+            </tbody>
+          </table>
+          <p class="ref-note">ELS Classification (European Laryngological Society) — Piazza et al. 2014. Primarily applied to vocal cord / laryngeal lesions.</p>
+        </div>
+        <div class="ref-content hidden" id="ref-who">
+          <table class="ref-table">
+            <thead><tr><th>Category</th><th>Histopathological Criteria</th><th>Malignant Transformation Risk</th><th>Management</th></tr></thead>
+            <tbody>
+              <tr class="risk-low"><td><span class="badge badge-green">No Dysplasia</span></td><td>Normal epithelium / hyperplasia without atypia</td><td>&lt;1%</td><td>Monitor / eliminate risk factors</td></tr>
+              <tr class="risk-low"><td><span class="badge badge-blue">Mild Dysplasia</span></td><td>Architectural &amp; cytological atypia confined to lower 1/3 epithelium</td><td>~5%</td><td>3–6 monthly surveillance</td></tr>
+              <tr class="risk-mod"><td><span class="badge badge-yellow">Moderate Dysplasia</span></td><td>Atypia in lower 2/3 epithelium; increased mitoses</td><td>~15–20%</td><td>Biopsy; consider excision</td></tr>
+              <tr class="risk-high"><td><span class="badge badge-orange">Severe Dysplasia</span></td><td>Atypia in &gt;2/3 epithelium; marked pleomorphism</td><td>~30–40%</td><td>Surgical excision / ablation</td></tr>
+              <tr class="risk-veryhigh"><td><span class="badge badge-red">CIS / HSIL</span></td><td>Full-thickness epithelial dysplasia; no stromal invasion</td><td>~50%+</td><td>Urgent excision / treatment</td></tr>
+            </tbody>
+          </table>
+          <p class="ref-note">WHO 2022 Classification of Head and Neck Tumours. Binary system: Low-grade (mild/moderate) vs High-grade (severe/CIS)</p>
+        </div>
+      </div>
+
+      <!-- Per-Lesion NBI Assessment -->
+      <div class="subsection" id="nbiLesionsSection">
+        <div class="subsection-header-row">
+          <h3 class="subsection-title">Per-Lesion NBI Assessment</h3>
+          <p class="subsection-hint" id="nbiLesionHint">Add lesions in Step 3 first, or click + to add NBI entries</p>
+        </div>
+        <div id="nbiLesionsContainer">
+          <!-- Populated from lesions or dynamically -->
+        </div>
+      </div>
+
+      <!-- Overall NBI Impression -->
+      <div class="subsection">
+        <h3 class="subsection-title">Overall NBI Impression</h3>
+        <div class="form-group">
+          <label for="nbiOverallImpression">Overall NBI Summary Statement</label>
+          <textarea id="nbiOverallImpression" rows="3" placeholder="e.g., NBI reveals IPCL Type III pattern at the right buccal lesion with tortuous elongated vessels, suspicious for moderate dysplasia. The left tonsillar lesion shows Type I pattern consistent with benign reactive change. The laryngeal leukoplakia demonstrates Type 0 pattern with surrounding Type II–III vessels suggesting underlying dysplasia..." oninput="updatePreview()"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="nbiLimitations">NBI Limitations / Confounders</label>
+          <textarea id="nbiLimitations" rows="2" placeholder="e.g., Thick keratosis (umbrella effect) at lesion 2 obscures underlying vascularity. Assessment based on surrounding mucosa pattern." oninput="updatePreview()"></textarea>
+        </div>
+      </div>
+
+      <div class="nav-buttons">
+        <button class="btn btn-ghost" onclick="prevSection(4)">← Back</button>
+        <button class="btn btn-primary" onclick="nextSection(4); computeAssessment()">Next: Severity Assessment →</button>
+      </div>
+    </section>
+
+    <!-- SECTION 5: AUTOMATED ASSESSMENT -->
+    <section class="form-section" id="section5" data-section="5">
+      <div class="section-header">
+        <div class="section-icon" style="background:linear-gradient(135deg,#10b981,#059669)">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+        </div>
+        <div>
+          <h2 class="section-title">Automated Severity Assessment</h2>
+          <p class="section-desc">AI-assisted risk stratification based on all entered parameters</p>
+        </div>
+      </div>
+
+      <!-- Risk Score Display -->
+      <div class="risk-dashboard" id="riskDashboard">
+        <div class="risk-gauge-container">
+          <div class="risk-gauge" id="riskGauge">
+            <svg viewBox="0 0 200 110" class="gauge-svg">
+              <defs>
+                <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#10b981"/>
+                  <stop offset="33%" stop-color="#f59e0b"/>
+                  <stop offset="66%" stop-color="#ef4444"/>
+                  <stop offset="100%" stop-color="#7c3aed"/>
+                </linearGradient>
+              </defs>
+              <path d="M 20 100 A 80 80 0 0 1 180 100" stroke="#1e293b" stroke-width="16" fill="none"/>
+              <path d="M 20 100 A 80 80 0 0 1 180 100" stroke="url(#gaugeGrad)" stroke-width="12" fill="none" stroke-dasharray="251.3" stroke-dashoffset="251.3" id="gaugeFill" class="gauge-fill"/>
+              <line x1="100" y1="100" x2="100" y2="30" stroke="#f8fafc" stroke-width="3" stroke-linecap="round" id="gaugeNeedle" style="transform-origin: 100px 100px; transform: rotate(-90deg)" class="gauge-needle"/>
+              <circle cx="100" cy="100" r="6" fill="#f8fafc"/>
+              <text x="100" y="85" text-anchor="middle" fill="#94a3b8" font-size="10">RISK SCORE</text>
+              <text x="100" y="70" text-anchor="middle" fill="#f8fafc" font-size="18" font-weight="bold" id="gaugeScoreText">0</text>
+            </svg>
+          </div>
+          <div class="risk-labels">
+            <span class="risk-label low">Low</span>
+            <span class="risk-label mod">Moderate</span>
+            <span class="risk-label high">High</span>
+            <span class="risk-label vhigh">Very High</span>
+          </div>
+        </div>
+        <div class="risk-cards">
+          <div class="risk-card" id="riskCard-overall">
+            <div class="risk-card-title">Overall Risk Level</div>
+            <div class="risk-card-value" id="riskLevelText">—</div>
+          </div>
+          <div class="risk-card" id="riskCard-ipcl">
+            <div class="risk-card-title">Highest IPCL Type</div>
+            <div class="risk-card-value" id="highestIPCL">—</div>
+          </div>
+          <div class="risk-card" id="riskCard-factors">
+            <div class="risk-card-title">Risk Factors</div>
+            <div class="risk-card-value" id="riskFactorCount">0</div>
+          </div>
+          <div class="risk-card" id="riskCard-lesions">
+            <div class="risk-card-title">Lesions Identified</div>
+            <div class="risk-card-value" id="lesionCount">0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detailed Assessment Per Lesion -->
+      <div class="subsection" id="perLesionAssessment">
+        <h3 class="subsection-title">Per-Lesion Risk Assessment</h3>
+        <div id="perLesionCards"></div>
+      </div>
+
+      <!-- Recommendations -->
+      <div class="subsection">
+        <h3 class="subsection-title">
+          <span class="pulse-dot"></span>
+          Automated Clinical Recommendations
+        </h3>
+        <div id="recommendationsContainer" class="recommendations-grid"></div>
+      </div>
+
+      <!-- Follow-up Schedule -->
+      <div class="subsection">
+        <h3 class="subsection-title">Follow-up Protocol</h3>
+        <div id="followUpProtocol" class="followup-timeline"></div>
+      </div>
+
+      <!-- Override / Additional Clinical Notes -->
+      <div class="subsection">
+        <h3 class="subsection-title">Clinician Override & Additional Notes</h3>
+        <div class="form-group">
+          <label for="clinicianAssessment">Clinician's Final Assessment</label>
+          <textarea id="clinicianAssessment" rows="3" placeholder="Override or supplement the automated assessment with your clinical judgment..." oninput="updatePreview()"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="differentialDiagnosis">Differential Diagnosis</label>
+          <textarea id="differentialDiagnosis" rows="2" placeholder="e.g., 1. Moderate oral epithelial dysplasia  2. Verrucous carcinoma  3. Hyperkeratosis without dysplasia" oninput="updatePreview()"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="mdtDiscussion">MDT Discussion / Referral</label>
+          <textarea id="mdtDiscussion" rows="2" placeholder="e.g., Refer to MDT. Consider co-assessment with oral medicine and head & neck surgery." oninput="updatePreview()"></textarea>
+        </div>
+      </div>
+
+      <div class="nav-buttons">
+        <button class="btn btn-ghost" onclick="prevSection(5)">← Back</button>
+        <button class="btn btn-primary" onclick="nextSection(5); renderFinalReport()">Next: Final Report →</button>
+      </div>
+    </section>
+
+    <!-- SECTION 6: FINAL REPORT -->
+    <section class="form-section" id="section6" data-section="6">
+      <div class="section-header">
+        <div class="section-icon" style="background:linear-gradient(135deg,#0f172a,#1e3a8a)">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"/></svg>
+        </div>
+        <div>
+          <h2 class="section-title">Report Preview & Export</h2>
+          <p class="section-desc">Review your complete NBI endoscopy report before download</p>
+        </div>
+      </div>
+
+      <div class="report-actions-bar">
+        <button class="btn btn-primary" onclick="generatePDF()">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+          Download PDF Report
+        </button>
+        <button class="btn btn-ghost" onclick="window.print()">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z" clip-rule="evenodd"/></svg>
+          Print
+        </button>
+        <button class="btn btn-ghost" onclick="copyReportText()">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z"/><path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z"/></svg>
+          Copy Text
+        </button>
+      </div>
+
+      <!-- Report Preview Panel -->
+      <div class="final-report-preview" id="finalReportPreview">
+        <!-- Rendered by JS -->
+      </div>
+
+      <div class="nav-buttons">
+        <button class="btn btn-ghost" onclick="prevSection(6)">← Back to Assessment</button>
+        <button class="btn btn-primary" onclick="generatePDF()">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+          Download Full PDF
+        </button>
+      </div>
+    </section>
+
+  </div><!-- /form-panel -->
+
+  <!-- RIGHT: LIVE PREVIEW -->
+  <aside class="preview-panel" id="previewPanel">
+    <div class="preview-header">
+      <h3>Live Report Preview</h3>
+      <span class="preview-tag">Auto-updating</span>
+    </div>
+    <div class="preview-content" id="previewContent">
+      <div class="preview-placeholder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
+        <p>Begin filling in patient details to see live report preview</p>
+      </div>
+    </div>
+  </aside>
+</main>
+
+<!-- TOAST NOTIFICATION -->
+<div class="toast" id="toast"></div>
+
+<!-- LESION TEMPLATE (hidden) -->
+<template id="lesionTemplate">
+  <div class="lesion-card" id="lesion-LESIONID">
+    <div class="lesion-card-header">
+      <div class="lesion-number">Lesion <span class="lesion-num-text">1</span></div>
+      <button class="btn-icon btn-danger" onclick="removeLesion('LESIONID')" title="Remove lesion">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+      </button>
+    </div>
+    <div class="lesion-card-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Site / Location</label>
+          <select class="lesion-field lesion-site" onchange="updatePreview()">
+            <option value="">Select site</option>
+            <optgroup label="Oral Cavity">
+              <option>Buccal mucosa – Right</option>
+              <option>Buccal mucosa – Left</option>
+              <option>Tongue – dorsum</option>
+              <option>Tongue – right lateral</option>
+              <option>Tongue – left lateral</option>
+              <option>Tongue – ventral</option>
+              <option>Tongue – tip</option>
+              <option>Floor of mouth – Right</option>
+              <option>Floor of mouth – Left</option>
+              <option>Floor of mouth – Midline</option>
+              <option>Hard palate</option>
+              <option>Gingiva – upper</option>
+              <option>Gingiva – lower</option>
+              <option>Retromolar trigone – Right</option>
+              <option>Retromolar trigone – Left</option>
+              <option>Lip – upper</option>
+              <option>Lip – lower</option>
+              <option>Lip commissure</option>
+            </optgroup>
+            <optgroup label="Oropharynx">
+              <option>Soft palate</option>
+              <option>Uvula</option>
+              <option>Palatine tonsil – Right</option>
+              <option>Palatine tonsil – Left</option>
+              <option>Anterior pillar – Right</option>
+              <option>Anterior pillar – Left</option>
+              <option>Posterior pillar – Right</option>
+              <option>Posterior pillar – Left</option>
+              <option>Base of tongue – Right</option>
+              <option>Base of tongue – Left</option>
+              <option>Posterior pharyngeal wall</option>
+              <option>Vallecula</option>
+            </optgroup>
+            <optgroup label="Larynx / Hypopharynx">
+              <option>Epiglottis – lingual surface</option>
+              <option>Epiglottis – laryngeal surface</option>
+              <option>Aryepiglottic fold – Right</option>
+              <option>Aryepiglottic fold – Left</option>
+              <option>False vocal cord – Right</option>
+              <option>False vocal cord – Left</option>
+              <option>True vocal cord – Right</option>
+              <option>True vocal cord – Left</option>
+              <option>True vocal cord – Anterior commissure</option>
+              <option>Subglottis</option>
+              <option>Pyriform sinus – Right</option>
+              <option>Pyriform sinus – Left</option>
+              <option>Post-cricoid region</option>
+            </optgroup>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Lesion Type (WL)</label>
+          <select class="lesion-field lesion-type" onchange="updatePreview()">
+            <option value="">Select type</option>
+            <option>Leukoplakia – homogeneous</option>
+            <option>Leukoplakia – non-homogeneous</option>
+            <option>Erythroplakia</option>
+            <option>Erythroleukoplakia (speckled)</option>
+            <option>Proliferative verrucous leukoplakia (PVL)</option>
+            <option>Ulcer / erosion</option>
+            <option>Nodular / papillary lesion</option>
+            <option>Flat erythematous patch</option>
+            <option>Exophytic mass</option>
+            <option>Submucosal bulge</option>
+            <option>Polypoid lesion</option>
+            <option>Vocal cord nodule / polyp</option>
+            <option>Reinke's oedema</option>
+            <option>Granuloma</option>
+            <option>Papilloma (HPV)</option>
+            <option>Lichen planus pattern</option>
+            <option>Post-surgical scar / change</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Size (mm)</label>
+          <input type="text" class="lesion-field lesion-size" placeholder="e.g., 8×5 mm or &lt;5mm" oninput="updatePreview()" />
+        </div>
+        <div class="form-group">
+          <label>Colour</label>
+          <select class="lesion-field lesion-color" onchange="updatePreview()">
+            <option>White</option>
+            <option>Red</option>
+            <option>Mixed red-white</option>
+            <option>Pink</option>
+            <option>Brown</option>
+            <option>Yellow</option>
+            <option>Grey</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Surface Texture</label>
+          <select class="lesion-field lesion-surface" onchange="updatePreview()">
+            <option>Smooth</option>
+            <option>Rough / irregular</option>
+            <option>Verrucous / warty</option>
+            <option>Nodular</option>
+            <option>Ulcerated</option>
+            <option>Friable</option>
+            <option>Keratotic</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Borders</label>
+          <select class="lesion-field lesion-borders" onchange="updatePreview()">
+            <option>Well-defined</option>
+            <option>Ill-defined</option>
+            <option>Sharp / punched-out</option>
+            <option>Irregular</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Induration</label>
+          <select class="lesion-field lesion-induration" onchange="updatePreview()">
+            <option>Not indurated</option>
+            <option>Mildly indurated</option>
+            <option>Moderately indurated</option>
+            <option>Markedly indurated</option>
+            <option>Not assessable (endoscopic only)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Mucosal Mobility</label>
+          <select class="lesion-field lesion-mobility" onchange="updatePreview()">
+            <option>Normal</option>
+            <option>Restricted</option>
+            <option>Fixed</option>
+            <option>Not assessable</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Additional WL Description</label>
+        <textarea class="lesion-field lesion-wldesc" rows="1" placeholder="Additional morphological details..." oninput="updatePreview()"></textarea>
+      </div>
+    </div>
+  </div>
+</template>
+
+<!-- NBI LESION TEMPLATE -->
+<template id="nbiLesionTemplate">
+  <div class="nbi-lesion-card" id="nbi-LESIONID">
+    <div class="nbi-card-header">
+      <div class="nbi-lesion-title">NBI Assessment – <span class="nbi-site-label">Lesion LESIONID</span></div>
+      <div class="nbi-badge-area" id="nbi-badge-LESIONID"></div>
+    </div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>IPCL / Ni Classification Type</label>
+        <select class="nbi-field nbi-ipcl" id="nbi-ipcl-LESIONID" onchange="updateNBIBadge('LESIONID'); updatePreview()">
+          <option value="">Select type</option>
+          <option value="0">Type 0 – Vessels obscured (keratosis)</option>
+          <option value="I">Type I – Normal / benign</option>
+          <option value="II">Type II – Dilated, inflammation</option>
+          <option value="III">Type III – Tortuous, premalignant</option>
+          <option value="IV">Type IV – Irregular dots, severe dysplasia</option>
+          <option value="Va">Type Va – Scattered brown dots (early SCC)</option>
+          <option value="Vb">Type Vb – Irregular loops (invasive SCC)</option>
+          <option value="Vc">Type Vc – Avascular / necrotic (advanced SCC)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>ELS Classification (Larynx)</label>
+        <select class="nbi-field nbi-els" id="nbi-els-LESIONID" onchange="updatePreview()">
+          <option value="NA">N/A (non-laryngeal)</option>
+          <option value="LVC">LVC – Longitudinal (non-suspicious)</option>
+          <option value="PVC-NA">PVC-NA – Perpendicular narrow (papilloma/SIN)</option>
+          <option value="PVC-WA">PVC-WA – Perpendicular wide (SCC)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Vessel Morphology</label>
+        <select class="nbi-field nbi-vessel" onchange="updatePreview()">
+          <option value="">Select pattern</option>
+          <option>Fine arborescent – regular calibre</option>
+          <option>Dilated – oblique</option>
+          <option>Tortuous – elongated IPCLs</option>
+          <option>Irregular / chaotic loops</option>
+          <option>Brown dots – regular spacing</option>
+          <option>Brown dots – irregular</option>
+          <option>Corkscrew / hairpin vessels</option>
+          <option>Avascular / destroyed loops</option>
+          <option>Neoangiogenesis – dense new vessels</option>
+          <option>Vessels not visible (obscured)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Lesion Demarcation on NBI</label>
+        <select class="nbi-field nbi-demarcation" onchange="updatePreview()">
+          <option>Well-demarcated (brownish zone)</option>
+          <option>Partially demarcated</option>
+          <option>Poorly demarcated</option>
+          <option>Non-demarcated (diffuse)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Background Mucosa Vascularity</label>
+        <select class="nbi-field nbi-background" onchange="updatePreview()">
+          <option>Normal background vascularity</option>
+          <option>Increased background vascularity</option>
+          <option>Abnormal background vessels</option>
+          <option>Cannot assess (keratosis)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Umbrella Effect (Keratosis)</label>
+        <select class="nbi-field nbi-umbrella" onchange="updatePreview()">
+          <option value="no">No – vessels clearly visible</option>
+          <option value="partial">Partial – some areas obscured</option>
+          <option value="complete">Complete – entire lesion obscured</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>NBI Impression for this Lesion</label>
+      <textarea class="nbi-field nbi-impression" rows="2" placeholder="Describe vascular pattern interpretation and clinical significance..." oninput="updatePreview()"></textarea>
+    </div>
+  </div>
+</template>
+
+<script src="app.js"></script>
+</body>
+</html>

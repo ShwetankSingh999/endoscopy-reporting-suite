@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Endoscopy Reporting Suite</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-bg">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+  </div>
+  <div class="hero-content">
+    <div class="brand-icon">
+      <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="20" cy="20" r="18" stroke="url(#g1)" stroke-width="2"/>
+        <circle cx="20" cy="20" r="8" fill="url(#g2)" opacity="0.8"/>
+        <path d="M20 6 C26 10 30 16 28 22" stroke="#7dd3fc" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M14 8 C8 14 8 22 12 28" stroke="#a78bfa" stroke-width="1.5" stroke-linecap="round"/>
+        <defs>
+          <linearGradient id="g1" x1="0" y1="0" x2="40" y2="40">
+            <stop offset="0%" stop-color="#7dd3fc"/>
+            <stop offset="100%" stop-color="#a78bfa"/>
+          </linearGradient>
+          <linearGradient id="g2" x1="0" y1="0" x2="40" y2="40">
+            <stop offset="0%" stop-color="#0ea5e9" stop-opacity="0.6"/>
+            <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0.6"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
+    <h1 class="hero-title">Endoscopy Reporting Suite</h1>
+    <p class="hero-subtitle">Advanced Clinical Tools for ENT &amp; Head/Neck Assessment</p>
+  </div>
+</header>
+
+<main class="container">
+  <div class="cards-grid">
+    
+    <!-- FEES App Card -->
+    <a href="fees/index.html" class="app-card">
+      <div class="card-icon fees-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 14c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v4m0 0l-2-2m2 2l2-2"/>
+        </svg>
+      </div>
+      <h2 class="card-title">FEES Reporting System</h2>
+      <p class="card-desc">Flexible Endoscopic Evaluation of Swallowing. Document dysphagia, penetration-aspiration scale, and residue mapping.</p>
+      <div class="card-action">Launch Application →</div>
+    </a>
+
+    <!-- NBI App Card -->
+    <a href="nbi/index.html" class="app-card">
+      <div class="card-icon nbi-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+        </svg>
+      </div>
+      <h2 class="card-title">NBI Assessment Tool</h2>
+      <p class="card-desc">Narrow Band Imaging Analysis. Risk stratification for oral, oropharyngeal, and laryngeal lesions using IPCL/Ni &amp; ELS classifications.</p>
+      <div class="card-action">Launch Application →</div>
+    </a>
+
+  </div>
+</main>
+
+<footer class="footer">
+  <p>&copy; <script>document.write(new Date().getFullYear())</script> Endoscopy Reporting Suite · Built for Clinical Excellence</p>
+</footer>
+
+</body>
+</html>

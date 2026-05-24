@@ -1,0 +1,202 @@
+:root {
+  --bg-color: #050b18;
+  --card-bg: #0f172a;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --accent-cyan: #0ea5e9;
+  --accent-violet: #8b5cf6;
+  --fees-color: #10b981;
+  --nbi-color: #3b82f6;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* HERO SECTION */
+.hero {
+  position: relative;
+  padding: 80px 20px;
+  text-align: center;
+  overflow: hidden;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.hero-bg {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.4;
+}
+.blob-1 {
+  width: 400px; height: 400px;
+  background: var(--accent-cyan);
+  top: -200px; left: -100px;
+}
+.blob-2 {
+  width: 300px; height: 300px;
+  background: var(--accent-violet);
+  bottom: -150px; right: -50px;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.brand-icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 24px;
+}
+
+.hero-title {
+  font-size: 3rem;
+  font-weight: 800;
+  letter-spacing: -1px;
+  margin-bottom: 16px;
+  background: linear-gradient(135deg, #f8fafc, #94a3b8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.hero-subtitle {
+  font-size: 1.2rem;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+/* MAIN CONTENT */
+.container {
+  flex: 1;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 60px 20px;
+  width: 100%;
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 30px;
+}
+
+/* APP CARDS */
+.app-card {
+  background: var(--card-bg);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 40px 30px;
+  text-decoration: none;
+  color: var(--text-main);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: rgba(255,255,255,0.1);
+  transition: all 0.3s ease;
+}
+
+.app-card[href*="fees"]::before { background: var(--fees-color); }
+.app-card[href*="nbi"]::before { background: var(--nbi-color); }
+
+.app-card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(255,255,255,0.15);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+}
+
+.app-card:hover::before {
+  height: 6px;
+}
+
+.card-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.fees-icon {
+  background: rgba(16,185,129,0.15);
+  color: var(--fees-color);
+}
+
+.nbi-icon {
+  background: rgba(59,130,246,0.15);
+  color: var(--nbi-color);
+}
+
+.card-icon svg {
+  width: 28px;
+  height: 28px;
+}
+
+.card-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.card-desc {
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin-bottom: 30px;
+  flex: 1;
+}
+
+.card-action {
+  font-weight: 600;
+  font-size: 0.95rem;
+  display: inline-flex;
+  align-items: center;
+  transition: color 0.2s ease;
+}
+
+.app-card[href*="fees"] .card-action { color: var(--fees-color); }
+.app-card[href*="nbi"] .card-action { color: var(--nbi-color); }
+
+.app-card:hover .card-action {
+  filter: brightness(1.2);
+}
+
+/* FOOTER */
+.footer {
+  text-align: center;
+  padding: 30px 20px;
+  color: rgba(148,163,184,0.6);
+  font-size: 0.85rem;
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+
+@media (max-width: 600px) {
+  .hero-title { font-size: 2.2rem; }
+  .cards-grid { grid-template-columns: 1fr; }
+}
