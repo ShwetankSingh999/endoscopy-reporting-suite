@@ -123,6 +123,7 @@ body {
 
 .app-card[href*="fees"]::before { background: var(--fees-color); }
 .app-card[href*="nbi"]::before { background: var(--nbi-color); }
+.app-card[href*="fol"]::before { background: #8b5cf6; }
 
 .app-card:hover {
   transform: translateY(-5px);
@@ -154,6 +155,11 @@ body {
   color: var(--nbi-color);
 }
 
+.fol-icon {
+  background: rgba(139,92,246,0.15);
+  color: #8b5cf6;
+}
+
 .card-icon svg {
   width: 28px;
   height: 28px;
@@ -182,6 +188,7 @@ body {
 
 .app-card[href*="fees"] .card-action { color: var(--fees-color); }
 .app-card[href*="nbi"] .card-action { color: var(--nbi-color); }
+.app-card[href*="fol"] .card-action { color: #8b5cf6; }
 
 .app-card:hover .card-action {
   filter: brightness(1.2);

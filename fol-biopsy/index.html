@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FOL & Biopsy Assessment</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- Floating Toast Notification -->
+  <div id="toast" class="toast">Saved successfully</div>
+
+  <!-- Header -->
+  <header class="top-nav">
+    <div class="nav-brand">
+      <a href="../index.html" class="back-link" title="Back to Suite">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+      </a>
+      <div class="brand-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/>
+        </svg>
+      </div>
+      <div>
+        <h1>FOL & Biopsy Assessor</h1>
+        <p class="subtitle">Fiberoptic Laryngoscopy Documentation</p>
+      </div>
+    </div>
+    <div class="nav-actions">
+      <button class="btn btn-primary" onclick="generatePDF()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+        Generate Report
+      </button>
+    </div>
+  </header>
+
+  <div class="layout-wrapper">
+    <!-- Left Column: Form -->
+    <div class="panel scroll-panel form-panel">
+      
+      <!-- Section 1: Demographics -->
+      <section class="form-section">
+        <h2 class="section-title"><span class="step-num">1</span> Patient & Setup</h2>
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Patient Name</label>
+            <input type="text" id="patientName" placeholder="e.g. John Doe">
+          </div>
+          <div class="form-group">
+            <label>Patient ID / MRN</label>
+            <input type="text" id="patientId" placeholder="e.g. MRN-12345">
+          </div>
+          <div class="form-group">
+            <label>Date of Birth</label>
+            <input type="date" id="patientDob" onchange="calcAge()">
+          </div>
+          <div class="form-group age-group">
+            <label>Age (Auto)</label>
+            <input type="number" id="patientAge" placeholder="—" readonly>
+            <span class="auto-badge">Auto</span>
+          </div>
+          <div class="form-group">
+            <label>Gender</label>
+            <select id="patientGender">
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Date of Exam</label>
+            <input type="date" id="examDate">
+          </div>
+        </div>
+
+        <div class="divider"></div>
+        <h3 class="subsection-title">Clinical Indication</h3>
+        <div class="chip-group" id="indicationsGroup">
+          <label class="chip"><input type="checkbox" value="Dysphonia/Hoarseness"> Dysphonia/Hoarseness</label>
+          <label class="chip"><input type="checkbox" value="Dysphagia"> Dysphagia</label>
+          <label class="chip"><input type="checkbox" value="Suspected Neoplasm"> Suspected Neoplasm</label>
+          <label class="chip"><input type="checkbox" value="Chronic Cough"> Chronic Cough</label>
+          <label class="chip"><input type="checkbox" value="Stridor"> Stridor</label>
+          <label class="chip"><input type="checkbox" value="Airway Surveillance"> Airway Surveillance</label>
+        </div>
+
+        <div class="divider"></div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Procedure Type</label>
+            <select id="procedureType">
+              <option value="In-Office Transnasal Flexible">In-Office Transnasal Flexible</option>
+              <option value="Direct Microlaryngoscopy (OR)">Direct Microlaryngoscopy (OR)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Anesthesia / Prep</label>
+            <select id="anesthesia">
+              <option value="Topical (Lidocaine + Phenylephrine)">Topical (Lidocaine + Phenylephrine)</option>
+              <option value="Topical (Other)">Topical (Other)</option>
+              <option value="General Anesthesia">General Anesthesia</option>
+              <option value="None">None</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 2: Anatomical Assessment -->
+      <section class="form-section">
+        <h2 class="section-title"><span class="step-num">2</span> Anatomical Checklist</h2>
+        <p class="helper-text">Select areas that appear normal. Leave unchecked to mark as abnormal or not assessed.</p>
+        
+        <div class="anatomy-grid">
+          <label class="toggle-item"><input type="checkbox" checked> <span class="toggle-label">Nasal Cavity & Septum</span></label>
+          <label class="toggle-item"><input type="checkbox" checked> <span class="toggle-label">Nasopharynx (Adenoid/Eustachian)</span></label>
+          <label class="toggle-item"><input type="checkbox" checked> <span class="toggle-label">Oropharynx (BOT/Tonsils)</span></label>
+          <label class="toggle-item"><input type="checkbox" checked> <span class="toggle-label">Hypopharynx (Piriform Sinuses)</span></label>
+          <label class="toggle-item"><input type="checkbox" checked> <span class="toggle-label">Epiglottis & Aryepiglottic Folds</span></label>
+          <label class="toggle-item"><input type="checkbox" checked> <span class="toggle-label">False Vocal Cords</span></label>
+          <label class="toggle-item"><input type="checkbox" checked> <span class="toggle-label">True Vocal Cords</span></label>
+          <label class="toggle-item"><input type="checkbox" checked> <span class="toggle-label">Subglottis</span></label>
+        </div>
+
+        <div class="divider"></div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Vocal Cord Mobility</label>
+            <select id="vcMobility">
+              <option value="Normal bilateral mobility">Normal bilateral mobility</option>
+              <option value="Right paresis/paralysis">Right paresis/paralysis</option>
+              <option value="Left paresis/paralysis">Left paresis/paralysis</option>
+              <option value="Bilateral paresis/paralysis">Bilateral paresis/paralysis</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Airway Patency</label>
+            <select id="airwayPatency">
+              <option value="Adequate (No obstruction)">Adequate (No obstruction)</option>
+              <option value="Mild narrowing">Mild narrowing</option>
+              <option value="Moderate obstruction">Moderate obstruction</option>
+              <option value="Severe obstruction">Severe obstruction</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 3: Lesion & Biopsy Documentation -->
+      <section class="form-section">
+        <h2 class="section-title"><span class="step-num">3</span> Lesions & Biopsy</h2>
+        
+        <div id="lesionsContainer">
+          <!-- Dynamically populated lesions go here -->
+        </div>
+        
+        <button class="btn btn-outline" onclick="addLesion()">+ Add Lesion / Biopsy Site</button>
+
+        <div class="divider"></div>
+        <div class="form-group">
+          <label>General Findings / Complications</label>
+          <textarea id="generalFindings" rows="3" placeholder="Describe any bleeding, hemostasis methods (e.g., adrenaline pledgets), or patient tolerance..."></textarea>
+        </div>
+      </section>
+
+      <!-- Section 4: Plan -->
+      <section class="form-section">
+        <h2 class="section-title"><span class="step-num">4</span> Clinical Plan</h2>
+        <div class="form-group">
+          <label>Physician Assessment & Plan</label>
+          <textarea id="clinicalPlan" rows="3" placeholder="e.g., Await histopathology results. Review in clinic in 2 weeks..."></textarea>
+        </div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Attending Clinician</label>
+            <input type="text" id="doctorName" placeholder="Dr. Name">
+          </div>
+          <div class="form-group">
+            <label>Institution</label>
+            <input type="text" id="institution" placeholder="Hospital / Clinic Name">
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Right Column: Live Preview -->
+    <div class="panel scroll-panel preview-panel">
+      <div class="preview-header">
+        <h2>Report Preview</h2>
+        <span class="badge">Live Sync</span>
+      </div>
+      <div class="preview-content" id="reportPreview">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+
+  </div>
+
+  <template id="lesion-template">
+    <div class="lesion-card">
+      <div class="lesion-header">
+        <h4>Lesion #<span class="lesion-index"></span></h4>
+        <button class="btn-icon" onclick="removeLesion(this)">✕</button>
+      </div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label>Anatomical Site</label>
+          <input type="text" class="lesion-site" placeholder="e.g. Left True Vocal Cord">
+        </div>
+        <div class="form-group">
+          <label>Size (approx)</label>
+          <input type="text" class="lesion-size" placeholder="e.g. 5x4 mm">
+        </div>
+        <div class="form-group">
+          <label>Morphology</label>
+          <select class="lesion-morph">
+            <option value="Exophytic/Fungating">Exophytic / Fungating</option>
+            <option value="Ulcerative">Ulcerative</option>
+            <option value="Polypoid/Nodular">Polypoid / Nodular</option>
+            <option value="Leukoplakia">Leukoplakia</option>
+            <option value="Erythroplakia">Erythroplakia</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Leukoplakia Class (Zhang)</label>
+          <select class="lesion-leuk">
+            <option value="N/A">Not Applicable</option>
+            <option value="Type I (Flat/Smooth)">Type I (Flat/Smooth)</option>
+            <option value="Type II (Bulged/Smooth)">Type II (Bulged/Smooth)</option>
+            <option value="Type III (Bulged/Rough)">Type III (Bulged/Rough)</option>
+          </select>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="form-group checkbox-group">
+        <label class="toggle-item"><input type="checkbox" class="lesion-biopsy-check" onchange="toggleBiopsyDetails(this)"> <span class="toggle-label">Biopsy Performed?</span></label>
+      </div>
+      <div class="biopsy-details" style="display: none;">
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Instrument Used</label>
+            <input type="text" class="biopsy-instrument" placeholder="e.g. Cupped flexible forceps">
+          </div>
+          <div class="form-group">
+            <label>Samples Taken</label>
+            <input type="number" class="biopsy-samples" value="1" min="1">
+          </div>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <script src="app.js"></script>
+</body>
+</html>
